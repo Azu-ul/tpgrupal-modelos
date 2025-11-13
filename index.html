@@ -41,7 +41,7 @@
                     <th>Rol</th>
                 </tr>
             </thead>
-            <tbody></tbody>
+            <tbody id="tbodyPersonal"></tbody>
         </table>
 
         <h3>Registrar Mesa</h3>
@@ -58,7 +58,7 @@
                     <th>Mozo Asignado</th>
                 </tr>
             </thead>
-            <tbody></tbody>
+            <tbody id="tbodyMesas"></tbody>
         </table>
         <h3>Registrar Item de Menú</h3>
         <div class="form-group">
@@ -80,7 +80,7 @@
                     <th>Categoría</th>
                 </tr>
             </thead>
-            <tbody></tbody>
+            <tbody id="tbodyMenu"></tbody>
         </table>
 
         <h3>Reportes</h3>
@@ -92,6 +92,12 @@
             <button onclick="generarReporte()">Generar Reporte</button>
         </div>
         <div id="reporteResultado"></div>
+    </div>
+
+    <!-- VISTA COCINERO -->
+    <div id="vistaCocinero" class="vista">
+        <h2>Panel de Cocinero - <span id="nombreCocinero"></span></h2>
+        <div id="pedidosCocinero"></div>
     </div>
 
     <!-- VISTA MOZO -->
@@ -151,6 +157,9 @@
             personal.filter(p => p.rol === 'mozo').forEach(p => {
                 sel.innerHTML += `<option value="mozo-${p.id}">${p.nombre} (Mozo)</option>`;
             });
+            personal.filter(p => p.rol === 'cocinero').forEach(p => {
+                sel.innerHTML += `<option value="cocinero-${p.id}">${p.nombre} (Cocinero)</option>`;
+            });
             sel.innerHTML += '<option value="chef-1">Chef</option>';
             sel.innerHTML += '<option value="general">Vista General</option>';
         }
@@ -168,6 +177,12 @@
                 document.getElementById('vistaMozo').classList.add('active');
                 document.getElementById('nombreMozo').textContent = usuarioActual.nombre;
                 cargarMozo();
+            } else if (sel.startsWith('cocinero')) {
+                const id = sel.split('-')[1];
+                usuarioActual = personal.find(p => p.id == id);
+                document.getElementById('vistaCocinero').classList.add('active');
+                document.getElementById('nombreCocinero').textContent = usuarioActual.nombre;
+                cargarCocinero();
             } else if (sel.startsWith('chef')) {
                 document.getElementById('vistaChef').classList.add('active');
                 cargarChef();
@@ -178,20 +193,120 @@
         }
 
         async function cargarAdmin() {
-            const tbPersonal = document.querySelector('#tablaPersonal tbody');
-            tbPersonal.innerHTML = personal.map(p =>
-                `<tr><td>${p.id}</td><td>${p.nombre}</td><td>${p.rol}</td></tr>`
-            ).join('');
+            const tbPersonal = document.getElementById('tbodyPersonal');
+            tbPersonal.innerHTML = personal.map(p => `
+        <tr>
+            <td>${p.id}</td>
+            <td><input type="text" id="pnombre-${p.id}" value="${p.nombre}" style="width:150px"></td>
+            <td>
+                <select id="prol-${p.id}">
+                    <option ${p.rol === 'mozo' ? 'selected' : ''}>mozo</option>
+                    <option ${p.rol === 'chef' ? 'selected' : ''}>chef</option>
+                    <option ${p.rol === 'cocinero' ? 'selected' : ''}>cocinero</option>
+                    <option ${p.rol === 'admin' ? 'selected' : ''}>admin</option>
+                </select>
+            </td>
+            <td>
+                <button onclick="editarPersonal(${p.id})">💾</button>
+                <button class="danger" onclick="eliminarPersonal(${p.id})">🗑️</button>
+            </td>
+        </tr>
+    `).join('');
 
-            const tbMenu = document.querySelector('#tablaMenu tbody');
-            tbMenu.innerHTML = menu.map(m =>
-                `<tr><td>${m.nombre}</td><td>$${m.precio}</td><td>${m.categoria}</td></tr>`
-            ).join('');
+            const tbMenu = document.getElementById('tbodyMenu');
+            tbMenu.innerHTML = menu.map(m => `
+        <tr>
+            <td><input type="text" id="mnombre-${m.id}" value="${m.nombre}" style="width:150px"></td>
+            <td><input type="number" id="mprecio-${m.id}" value="${m.precio}" style="width:80px"></td>
+            <td>
+                <select id="mcat-${m.id}">
+                    <option ${m.categoria === 'entrada' ? 'selected' : ''}>entrada</option>
+                    <option ${m.categoria === 'principal' ? 'selected' : ''}>principal</option>
+                    <option ${m.categoria === 'postre' ? 'selected' : ''}>postre</option>
+                    <option ${m.categoria === 'bebida' ? 'selected' : ''}>bebida</option>
+                </select>
+            </td>
+            <td>
+                <button onclick="editarMenu(${m.id})">💾</button>
+                <button class="danger" onclick="eliminarMenu(${m.id})">🗑️</button>
+            </td>
+        </tr>
+    `).join('');
 
-            const tbMesas = document.querySelector('#tablaMesas tbody');
-            tbMesas.innerHTML = mesas.map(m =>
-                `<tr><td>${m.numero}</td><td>${m.capacidad}</td><td>${m.mozo_nombre || 'Disponible'}</td></tr>`
-            ).join('');
+            const tbMesas = document.getElementById('tbodyMesas');
+            tbMesas.innerHTML = mesas.map(m => `
+        <tr>
+            <td><input type="number" id="mnum-${m.id}" value="${m.numero}" style="width:60px"></td>
+            <td><input type="number" id="mcap-${m.id}" value="${m.capacidad}" style="width:60px"></td>
+            <td>${m.mozo_nombre || 'Disponible'}</td>
+            <td>
+                <button onclick="editarMesa(${m.id})">💾</button>
+                <button class="danger" onclick="eliminarMesa(${m.id})">🗑️</button>
+            </td>
+        </tr>
+    `).join('');
+        }
+
+        async function editarPersonal(id) {
+            const nombre = document.getElementById(`pnombre-${id}`).value;
+            const rol = document.getElementById(`prol-${id}`).value;
+            await fetch(`${API}/personal/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre, rol })
+            });
+            await cargarDatos();
+            cargarAdmin();
+        }
+
+        async function eliminarPersonal(id) {
+            if (!confirm('¿Eliminar este personal?')) return;
+            const res = await fetch(`${API}/personal/${id}`, { method: 'DELETE' });
+            if (!res.ok) alert('No se puede eliminar, tiene relaciones activas');
+            await cargarDatos();
+            cargarAdmin();
+        }
+
+        async function editarMesa(id) {
+            const numero = document.getElementById(`mnum-${id}`).value;
+            const capacidad = document.getElementById(`mcap-${id}`).value;
+            const res = await fetch(`${API}/mesas/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ numero, capacidad })
+            });
+            if (!res.ok) alert('Número de mesa duplicado');
+            await cargarDatos();
+            cargarAdmin();
+        }
+
+        async function eliminarMesa(id) {
+            if (!confirm('¿Eliminar esta mesa?')) return;
+            const res = await fetch(`${API}/mesas/${id}`, { method: 'DELETE' });
+            if (!res.ok) alert('No se puede eliminar, tiene pedidos asociados');
+            await cargarDatos();
+            cargarAdmin();
+        }
+
+        async function editarMenu(id) {
+            const nombre = document.getElementById(`mnombre-${id}`).value;
+            const precio = document.getElementById(`mprecio-${id}`).value;
+            const categoria = document.getElementById(`mcat-${id}`).value;
+            await fetch(`${API}/menu/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre, precio, categoria })
+            });
+            await cargarDatos();
+            cargarAdmin();
+        }
+
+        async function eliminarMenu(id) {
+            if (!confirm('¿Eliminar este ítem?')) return;
+            const res = await fetch(`${API}/menu/${id}`, { method: 'DELETE' });
+            if (!res.ok) alert('No se puede eliminar, está en pedidos activos');
+            await cargarDatos();
+            cargarAdmin();
         }
 
         async function agregarPersonal() {
@@ -356,11 +471,11 @@
                 alert('Selecciona al menos un item');
                 return;
             }
-
+            const chefId = usuarioActual.rol === 'chef' ? usuarioActual.id : null;
             await fetch(`${API}/pedidos`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ mesa_id: mesaActualPedido, mozo_id: usuarioActual.id, items })
+                body: JSON.stringify({ mesa_id: mesaActualPedido, mozo_id: usuarioActual.id, items, chef_id: chefId })
             });
 
             cerrarModal();
@@ -378,23 +493,73 @@
 
         async function cargarChef() {
             await cargarDatos();
-            const pendientes = pedidos.filter(p => ['pendiente', 'en_preparacion', 'listo'].includes(p.estado));
+            const pendientes = pedidos.filter(p => ['pendiente', 'asignado', 'cocinando', 'en_preparacion', 'listo'].includes(p.estado));
 
+            const cocineros = personal.filter(p => p.rol === 'cocinero');
             let html = '';
             for (let p of pendientes) {
                 const items = await fetch(`${API}/pedidos/${p.id}/items`).then(r => r.json());
                 html += `<div class="pedido-card">
-                    <strong>Pedido #${p.id} - Mesa ${p.mesa_numero}</strong>
-                    <span class="estado ${p.estado}">${p.estado}</span>
-                    <div>${items.map(i => `${i.nombre} x${i.cantidad}`).join(', ')}</div>
-                    <div>
-                        ${p.estado === 'pendiente' ? `<button onclick="cambiarEstado(${p.id}, 'en_preparacion')">Iniciar</button>` : ''}
-                        ${p.estado === 'en_preparacion' ? `<button class="success" onclick="cambiarEstado(${p.id}, 'listo')">Listo</button>` : ''}
-                        ${p.estado === 'listo' ? `<button class="secondary" onclick="cambiarEstado(${p.id}, 'entregado')">Despachar</button>` : ''}
-                    </div>
-                </div>`;
+            <strong>Pedido #${p.id} - Mesa ${p.mesa_numero}</strong>
+            <span class="estado ${p.estado}">${p.estado}</span>
+            ${p.cocinero_nombre ? `<div>👨‍🍳 ${p.cocinero_nombre}</div>` : ''}
+            <div>${items.map(i => `${i.nombre} x${i.cantidad}`).join(', ')}</div>
+            <div>
+                ${p.estado === 'pendiente' ? `
+                    <select id="coci-${p.id}">
+                        <option value="">Asignar cocinero...</option>
+                        ${cocineros.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('')}
+                    </select>
+                    <button onclick="asignarCocinero(${p.id})">Asignar</button>
+                ` : ''}
+                ${p.estado === 'cocinando' ? `<button onclick="cambiarEstado(${p.id}, 'en_preparacion')">Iniciar Preparación Final</button>` : ''}
+                ${p.estado === 'en_preparacion' ? `<button class="success" onclick="cambiarEstado(${p.id}, 'listo')">Listo</button>` : ''}
+                ${p.estado === 'listo' ? `<button class="secondary" onclick="cambiarEstado(${p.id}, 'entregado')">Despachar</button>` : ''}
+            </div>
+        </div>`;
             }
             document.getElementById('ordenesChef').innerHTML = html || '<p>No hay órdenes pendientes</p>';
+        }
+
+        async function asignarCocinero(pedidoId) {
+            const cocineroId = document.getElementById(`coci-${pedidoId}`).value;
+            if (!cocineroId) return alert('Selecciona un cocinero');
+            await fetch(`${API}/pedidos/${pedidoId}/asignar-cocinero`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cocinero_id: cocineroId })
+            });
+            cargarChef();
+        }
+
+        async function cargarCocinero() {
+            await cargarDatos();
+            const misPedidos = pedidos.filter(p => p.cocinero_id == usuarioActual.id && ['asignado', 'cocinando'].includes(p.estado));
+
+            let html = '';
+            for (let p of misPedidos) {
+                const items = await fetch(`${API}/pedidos/${p.id}/items`).then(r => r.json());
+                html += `<div class="pedido-card">
+            <strong>Pedido #${p.id} - Mesa ${p.mesa_numero}</strong>
+            <span class="estado ${p.estado}">${p.estado}</span>
+            <div>👨‍🍳 Asignado por: ${p.chef_nombre}</div>
+            <div>${items.map(i => `${i.nombre} x${i.cantidad}`).join(', ')}</div>
+            <div>
+                ${p.estado === 'asignado' ? `<button onclick="cambiarEstadoCocinero(${p.id}, 'cocinando')">🔥 Cocinar</button>` : ''}
+                ${p.estado === 'cocinando' ? `<button class="success" onclick="cambiarEstadoCocinero(${p.id}, 'en_preparacion')">✅ Terminado</button>` : ''}
+            </div>
+        </div>`;
+            }
+            document.getElementById('pedidosCocinero').innerHTML = html || '<p>No tienes pedidos asignados</p>';
+        }
+
+        async function cambiarEstadoCocinero(pedidoId, estado) {
+            await fetch(`${API}/pedidos/${pedidoId}/estado`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ estado })
+            });
+            cargarCocinero();
         }
 
         async function cambiarEstado(pedidoId, estado) {

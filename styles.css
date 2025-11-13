@@ -21,7 +21,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .header h1 {
@@ -53,7 +53,7 @@ body {
     max-width: 600px;
     max-height: 80vh;
     overflow-y: auto;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
 .menu-item {
@@ -86,7 +86,7 @@ body {
     padding: 16px;
     border-radius: 8px;
     display: none;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .vista.active {
@@ -134,7 +134,8 @@ button.danger:hover {
     background: #6b0a0a;
 }
 
-input, select {
+input,
+select {
     padding: 6px 8px;
     margin: 3px;
     border: 1px solid #6b1a1a;
@@ -155,7 +156,8 @@ table {
     font-size: 13px;
 }
 
-th, td {
+th,
+td {
     padding: 8px;
     text-align: left;
     border-bottom: 1px solid #6b1a1a;
@@ -202,7 +204,7 @@ tr:hover {
 
 .mesa-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .mesa-card.ocupada {
@@ -288,4 +290,19 @@ h3 {
 #reporteResultado p {
     margin: 6px 0;
     font-size: 14px;
+}
+
+.estado.asignado {
+    background: #8b6914;
+    color: #fff;
+}
+
+.estado.cocinando {
+    background: #d4431a;
+    color: #fff;
+}
+
+table th:last-child,
+table td:last-child {
+    text-align: center;
 }

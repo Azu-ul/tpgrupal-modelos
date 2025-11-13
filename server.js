@@ -38,6 +38,21 @@ app.post('/api/personal', (req, res) => {
     });
 });
 
+app.put('/api/personal/:id', (req, res) => {
+    const { nombre, rol } = req.body;
+    db.query('UPDATE personal SET nombre = ?, rol = ? WHERE id = ?', [nombre, rol, req.params.id], (err) => {
+        if (err) return res.status(400).json({ error: 'Error al actualizar' });
+        res.json({ success: true });
+    });
+});
+
+app.delete('/api/personal/:id', (req, res) => {
+    db.query('DELETE FROM personal WHERE id = ?', [req.params.id], (err) => {
+        if (err) return res.status(400).json({ error: 'No se puede eliminar, tiene relaciones' });
+        res.json({ success: true });
+    });
+});
+
 // Mesas
 app.get('/api/mesas', (req, res) => {
     db.query(`SELECT m.*, p.nombre as mozo_nombre 
@@ -67,6 +82,21 @@ app.put('/api/mesas/:id/asignar', (req, res) => {
     });
 });
 
+app.put('/api/mesas/:id', (req, res) => {
+    const { numero, capacidad } = req.body;
+    db.query('UPDATE mesas SET numero = ?, capacidad = ? WHERE id = ?', [numero, capacidad, req.params.id], (err) => {
+        if (err) return res.status(400).json({ error: 'Número duplicado o error' });
+        res.json({ success: true });
+    });
+});
+
+app.delete('/api/mesas/:id', (req, res) => {
+    db.query('DELETE FROM mesas WHERE id = ?', [req.params.id], (err) => {
+        if (err) return res.status(400).json({ error: 'No se puede eliminar, tiene pedidos asociados' });
+        res.json({ success: true });
+    });
+});
+
 // Menú
 app.get('/api/menu', (req, res) => {
     db.query('SELECT * FROM menu ORDER BY categoria, nombre', (err, results) => {
@@ -86,15 +116,34 @@ app.post('/api/menu', (req, res) => {
     });
 });
 
+app.put('/api/menu/:id', (req, res) => {
+    const { nombre, precio, categoria } = req.body;
+    db.query('UPDATE menu SET nombre = ?, precio = ?, categoria = ? WHERE id = ?',
+        [nombre, precio, categoria, req.params.id], (err) => {
+            if (err) return res.status(400).json({ error: 'Error al actualizar' });
+            res.json({ success: true });
+        });
+});
+
+app.delete('/api/menu/:id', (req, res) => {
+    db.query('DELETE FROM menu WHERE id = ?', [req.params.id], (err) => {
+        if (err) return res.status(400).json({ error: 'No se puede eliminar, está en pedidos' });
+        res.json({ success: true });
+    });
+});
+
 // Pedidos
 app.get('/api/pedidos', (req, res) => {
     const query = `
-        SELECT p.*, m.numero as mesa_numero, per.nombre as mozo_nombre
-        FROM pedidos p
-        JOIN mesas m ON p.mesa_id = m.id
-        JOIN personal per ON p.mozo_id = per.id
-        ORDER BY p.fecha DESC
-    `;
+    SELECT p.*, m.numero as mesa_numero, per.nombre as mozo_nombre,
+           c.nombre as cocinero_nombre, ch.nombre as chef_nombre
+    FROM pedidos p
+    JOIN mesas m ON p.mesa_id = m.id
+    JOIN personal per ON p.mozo_id = per.id
+    LEFT JOIN personal c ON p.cocinero_id = c.id
+    LEFT JOIN personal ch ON p.chef_id = ch.id
+    ORDER BY p.fecha DESC
+`;
     db.query(query, (err, results) => {
         if (err) throw err;
         res.json(results);
@@ -115,11 +164,11 @@ app.get('/api/pedidos/:id/items', (req, res) => {
 });
 
 app.post('/api/pedidos', (req, res) => {
-    const { mesa_id, mozo_id, items } = req.body;
+    const { mesa_id, mozo_id, items, cocinero_id, chef_id } = req.body;
     const total = items.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
 
-    db.query('INSERT INTO pedidos (mesa_id, mozo_id, total) VALUES (?, ?, ?)',
-        [mesa_id, mozo_id, total], (err, result) => {
+    db.query('INSERT INTO pedidos (mesa_id, mozo_id, total, cocinero_id, chef_id) VALUES (?, ?, ?, ?, ?)',
+        [mesa_id, mozo_id, total, cocinero_id || null, chef_id || null], (err, result) => {
             if (err) throw err;
             const pedido_id = result.insertId;
 
@@ -129,6 +178,15 @@ app.post('/api/pedidos', (req, res) => {
             });
 
             res.json({ id: pedido_id, total });
+        });
+});
+
+app.put('/api/pedidos/:id/asignar-cocinero', (req, res) => {
+    const { cocinero_id } = req.body;
+    db.query('UPDATE pedidos SET cocinero_id = ?, estado = ? WHERE id = ?',
+        [cocinero_id, 'asignado', req.params.id], (err) => {
+            if (err) throw err;
+            res.json({ success: true });
         });
 });
 
