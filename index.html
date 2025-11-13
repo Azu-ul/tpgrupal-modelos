@@ -220,7 +220,16 @@
             <input type="number" id="capacidadMesa" placeholder="Capacidad">
             <button onclick="agregarMesa()">Agregar Mesa</button>
         </div>
-
+        <table id="tablaMesas">
+            <thead>
+                <tr>
+                    <th>Número</th>
+                    <th>Capacidad</th>
+                    <th>Mozo Asignado</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
         <h3>Registrar Item de Menú</h3>
         <div class="form-group">
             <input type="text" id="nombreMenu" placeholder="Nombre">
@@ -335,6 +344,11 @@
             const tbMenu = document.querySelector('#tablaMenu tbody');
             tbMenu.innerHTML = menu.map(m =>
                 `<tr><td>${m.nombre}</td><td>$${m.precio}</td><td>${m.categoria}</td></tr>`
+            ).join('');
+
+            const tbMesas = document.querySelector('#tablaMesas tbody');
+            tbMesas.innerHTML = mesas.map(m =>
+                `<tr><td>${m.numero}</td><td>${m.capacidad}</td><td>${m.mozo_nombre || 'Disponible'}</td></tr>`
             ).join('');
         }
 
