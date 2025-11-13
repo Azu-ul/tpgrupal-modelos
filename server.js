@@ -149,13 +149,16 @@ app.get('/api/reportes/top-menu', (req, res) => {
         FROM pedido_items pi
         JOIN menu m ON pi.menu_id = m.id
         JOIN pedidos p ON pi.pedido_id = p.id
-        WHERE p.fecha BETWEEN ? AND ?
+        WHERE DATE(p.fecha) BETWEEN ? AND ?
         GROUP BY m.id
         ORDER BY total_vendido DESC
         LIMIT 5
     `;
     db.query(query, [fecha_inicio, fecha_fin], (err, results) => {
-        if (err) throw err;
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
         res.json(results);
     });
 });
@@ -165,7 +168,7 @@ app.get('/api/reportes/ventas', (req, res) => {
     const query = `
         SELECT SUM(total) as total_ventas, COUNT(*) as total_pedidos
         FROM pedidos
-        WHERE fecha BETWEEN ? AND ? AND estado = 'pagado'
+        WHERE DATE(fecha) BETWEEN ? AND ? AND estado = 'pagado'
     `;
     db.query(query, [fecha_inicio, fecha_fin], (err, results) => {
         if (err) throw err;

@@ -28,6 +28,51 @@
             align-items: center;
         }
 
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .menu-item {
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin: 5px 0;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .menu-item input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .menu-item input[type="number"] {
+            width: 60px;
+            margin-left: 10px;
+        }
+
         .vista {
             background: white;
             padding: 20px;
@@ -289,6 +334,18 @@
         <div id="todasOrdenes"></div>
     </div>
 
+    <!-- MODAL PEDIDO -->
+    <div id="modalPedido" class="modal">
+        <div class="modal-content">
+            <h3>Nuevo Pedido - Mesa <span id="mesaPedido"></span></h3>
+            <div id="menuItems"></div>
+            <div style="margin-top: 20px; text-align: right;">
+                <button class="secondary" onclick="cerrarModal()">Cancelar</button>
+                <button class="success" onclick="guardarPedido()">Guardar Pedido</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const API = 'http://localhost:3000/api';
         let personal = [];
@@ -463,22 +520,66 @@
             cargarMozo();
         }
 
+        let mesaActualPedido = null;
+
         function crearPedido(mesaId) {
-            const items = [];
-            menu.forEach(m => {
-                const cant = prompt(`${m.nombre} ($${m.precio}) - Cantidad:`);
-                if (cant && cant > 0) {
-                    items.push({ menu_id: m.id, cantidad: parseInt(cant), precio: parseFloat(m.precio) });
-                }
+            mesaActualPedido = mesaId;
+            const mesa = mesas.find(m => m.id === mesaId);
+            document.getElementById('mesaPedido').textContent = mesa.numero;
+
+            const menuHtml = menu.map(m => `
+                <div class="menu-item">
+                    <label style="flex: 1; cursor: pointer;">
+                        <input type="checkbox" class="item-check" data-id="${m.id}" data-precio="${m.precio}">
+                        <strong>${m.nombre}</strong> - $${m.precio} <em>(${m.categoria})</em>
+                    </label>
+                    <input type="number" class="item-cant" data-id="${m.id}" value="1" min="1" disabled>
+                </div>
+            `).join('');
+
+            document.getElementById('menuItems').innerHTML = menuHtml;
+
+            document.querySelectorAll('.item-check').forEach(check => {
+                check.addEventListener('change', function () {
+                    const cantInput = document.querySelector(`.item-cant[data-id="${this.dataset.id}"]`);
+                    cantInput.disabled = !this.checked;
+                    if (this.checked) cantInput.focus();
+                });
             });
 
-            if (items.length > 0) {
-                fetch(`${API}/pedidos`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ mesa_id: mesaId, mozo_id: usuarioActual.id, items })
-                }).then(() => cargarMozo());
+            document.getElementById('modalPedido').classList.add('active');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalPedido').classList.remove('active');
+            mesaActualPedido = null;
+        }
+
+        async function guardarPedido() {
+            const items = [];
+            document.querySelectorAll('.item-check:checked').forEach(check => {
+                const id = check.dataset.id;
+                const cant = document.querySelector(`.item-cant[data-id="${id}"]`).value;
+                items.push({
+                    menu_id: parseInt(id),
+                    cantidad: parseInt(cant),
+                    precio: parseFloat(check.dataset.precio)
+                });
+            });
+
+            if (items.length === 0) {
+                alert('Selecciona al menos un item');
+                return;
             }
+
+            await fetch(`${API}/pedidos`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mesa_id: mesaActualPedido, mozo_id: usuarioActual.id, items })
+            });
+
+            cerrarModal();
+            cargarMozo();
         }
 
         async function cobrarPedido(pedidoId) {
