@@ -1,41 +1,183 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema Restó</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
-        .header { background: white; padding: 15px; margin-bottom: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .vista { background: white; padding: 20px; border-radius: 8px; display: none; }
-        .vista.active { display: block; }
-        button { padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
-        button:hover { background: #0056b3; }
-        button.secondary { background: #6c757d; }
-        button.success { background: #28a745; }
-        button.danger { background: #dc3545; }
-        input, select { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background: #f8f9fa; font-weight: bold; }
-        .form-group { margin: 15px 0; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin: 20px 0; }
-        .mesa-card { background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #ddd; }
-        .mesa-card.ocupada { border-color: #ffc107; background: #fff3cd; }
-        .mesa-card.mia { border-color: #28a745; background: #d4edda; }
-        .pedido-card { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #007bff; }
-        .estado { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-        .estado.pendiente { background: #ffc107; color: #000; }
-        .estado.en_preparacion { background: #17a2b8; color: white; }
-        .estado.listo { background: #28a745; color: white; }
-        .estado.entregado { background: #6c757d; color: white; }
-        .estado.pagado { background: #343a40; color: white; }
-        h2 { margin-bottom: 20px; color: #333; }
-        h3 { margin: 15px 0; color: #555; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .header {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .vista {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .vista.active {
+            display: block;
+        }
+
+        button {
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        button.secondary {
+            background: #6c757d;
+        }
+
+        button.success {
+            background: #28a745;
+        }
+
+        button.danger {
+            background: #dc3545;
+        }
+
+        input,
+        select {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin: 15px 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .mesa-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #ddd;
+        }
+
+        .mesa-card.ocupada {
+            border-color: #ffc107;
+            background: #fff3cd;
+        }
+
+        .mesa-card.mia {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .pedido-card {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+
+        .estado {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .estado.pendiente {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .estado.en_preparacion {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .estado.listo {
+            background: #28a745;
+            color: white;
+        }
+
+        .estado.entregado {
+            background: #6c757d;
+            color: white;
+        }
+
+        .estado.pagado {
+            background: #343a40;
+            color: white;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        h3 {
+            margin: 15px 0;
+            color: #555;
+        }
     </style>
 </head>
+
 <body>
     <div class="header">
         <h1>🍽️ Sistema Restó</h1>
@@ -49,7 +191,7 @@
     <!-- VISTA ADMIN -->
     <div id="vistaAdmin" class="vista">
         <h2>Panel de Administración</h2>
-        
+
         <h3>Registrar Personal</h3>
         <div class="form-group">
             <input type="text" id="nombrePersonal" placeholder="Nombre">
@@ -62,7 +204,13 @@
             <button onclick="agregarPersonal()">Agregar Personal</button>
         </div>
         <table id="tablaPersonal">
-            <thead><tr><th>ID</th><th>Nombre</th><th>Rol</th></tr></thead>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Rol</th>
+                </tr>
+            </thead>
             <tbody></tbody>
         </table>
 
@@ -86,7 +234,13 @@
             <button onclick="agregarMenu()">Agregar al Menú</button>
         </div>
         <table id="tablaMenu">
-            <thead><tr><th>Nombre</th><th>Precio</th><th>Categoría</th></tr></thead>
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Precio</th>
+                    <th>Categoría</th>
+                </tr>
+            </thead>
             <tbody></tbody>
         </table>
 
@@ -104,7 +258,7 @@
     <!-- VISTA MOZO -->
     <div id="vistaMozo" class="vista">
         <h2>Panel de Mozo - <span id="nombreMozo"></span></h2>
-        
+
         <h3>Mesas Disponibles</h3>
         <div class="grid" id="mesasDisponibles"></div>
 
@@ -139,7 +293,7 @@
             mesas = await fetch(`${API}/mesas`).then(r => r.json());
             menu = await fetch(`${API}/menu`).then(r => r.json());
             pedidos = await fetch(`${API}/pedidos`).then(r => r.json());
-            
+
             const sel = document.getElementById('rolSelector');
             sel.innerHTML = '<option value="">Seleccionar rol...</option>';
             sel.innerHTML += '<option value="admin-1">Admin Principal</option>';
@@ -153,7 +307,7 @@
         function cambiarVista() {
             const sel = document.getElementById('rolSelector').value;
             document.querySelectorAll('.vista').forEach(v => v.classList.remove('active'));
-            
+
             if (sel.startsWith('admin')) {
                 document.getElementById('vistaAdmin').classList.add('active');
                 cargarAdmin();
@@ -174,12 +328,12 @@
 
         async function cargarAdmin() {
             const tbPersonal = document.querySelector('#tablaPersonal tbody');
-            tbPersonal.innerHTML = personal.map(p => 
+            tbPersonal.innerHTML = personal.map(p =>
                 `<tr><td>${p.id}</td><td>${p.nombre}</td><td>${p.rol}</td></tr>`
             ).join('');
 
             const tbMenu = document.querySelector('#tablaMenu tbody');
-            tbMenu.innerHTML = menu.map(m => 
+            tbMenu.innerHTML = menu.map(m =>
                 `<tr><td>${m.nombre}</td><td>$${m.precio}</td><td>${m.categoria}</td></tr>`
             ).join('');
         }
@@ -189,8 +343,8 @@
             const rol = document.getElementById('rolPersonal').value;
             await fetch(`${API}/personal`, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({nombre, rol})
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre, rol })
             });
             document.getElementById('nombrePersonal').value = '';
             await cargarDatos();
@@ -200,11 +354,15 @@
         async function agregarMesa() {
             const numero = document.getElementById('numeroMesa').value;
             const capacidad = document.getElementById('capacidadMesa').value;
-            await fetch(`${API}/mesas`, {
+            const res = await fetch(`${API}/mesas`, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({numero, capacidad})
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ numero, capacidad })
             });
+            if (!res.ok) {
+                alert('Error: Mesa duplicada o problema en BD');
+                return;
+            }
             document.getElementById('numeroMesa').value = '';
             document.getElementById('capacidadMesa').value = '';
             await cargarDatos();
@@ -216,8 +374,8 @@
             const categoria = document.getElementById('categoriaMenu').value;
             await fetch(`${API}/menu`, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({nombre, precio, categoria})
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre, precio, categoria })
             });
             document.getElementById('nombreMenu').value = '';
             document.getElementById('precioMenu').value = '';
@@ -228,25 +386,25 @@
         async function generarReporte() {
             const inicio = document.getElementById('fechaInicio').value;
             const fin = document.getElementById('fechaFin').value;
-            
+
             const topMenu = await fetch(`${API}/reportes/top-menu?fecha_inicio=${inicio}&fecha_fin=${fin}`).then(r => r.json());
             const ventas = await fetch(`${API}/reportes/ventas?fecha_inicio=${inicio}&fecha_fin=${fin}`).then(r => r.json());
-            
+
             let html = '<h3>Top 5 Menús Más Vendidos</h3><table><thead><tr><th>Nombre</th><th>Categoría</th><th>Cantidad</th><th>Ingresos</th></tr></thead><tbody>';
             topMenu.forEach(m => {
                 html += `<tr><td>${m.nombre}</td><td>${m.categoria}</td><td>${m.total_vendido}</td><td>$${m.ingresos}</td></tr>`;
             });
             html += `</tbody></table><h3>Resumen de Ventas</h3><p>Total Pedidos: ${ventas.total_pedidos || 0}</p><p>Total Ingresos: $${ventas.total_ventas || 0}</p>`;
-            
+
             document.getElementById('reporteResultado').innerHTML = html;
         }
 
         async function cargarMozo() {
             await cargarDatos();
-            
+
             const disponibles = mesas.filter(m => !m.mozo_id);
             const misMesas = mesas.filter(m => m.mozo_id == usuarioActual.id);
-            
+
             document.getElementById('mesasDisponibles').innerHTML = disponibles.map(m => `
                 <div class="mesa-card">
                     <div><strong>Mesa ${m.numero}</strong></div>
@@ -276,8 +434,8 @@
         async function tomarMesa(mesaId) {
             await fetch(`${API}/mesas/${mesaId}/asignar`, {
                 method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({mozo_id: usuarioActual.id})
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mozo_id: usuarioActual.id })
             });
             cargarMozo();
         }
@@ -285,8 +443,8 @@
         async function liberarMesa(mesaId) {
             await fetch(`${API}/mesas/${mesaId}/asignar`, {
                 method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({mozo_id: null})
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mozo_id: null })
             });
             cargarMozo();
         }
@@ -296,15 +454,15 @@
             menu.forEach(m => {
                 const cant = prompt(`${m.nombre} ($${m.precio}) - Cantidad:`);
                 if (cant && cant > 0) {
-                    items.push({menu_id: m.id, cantidad: parseInt(cant), precio: parseFloat(m.precio)});
+                    items.push({ menu_id: m.id, cantidad: parseInt(cant), precio: parseFloat(m.precio) });
                 }
             });
-            
+
             if (items.length > 0) {
                 fetch(`${API}/pedidos`, {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({mesa_id: mesaId, mozo_id: usuarioActual.id, items})
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mesa_id: mesaId, mozo_id: usuarioActual.id, items })
                 }).then(() => cargarMozo());
             }
         }
@@ -312,8 +470,8 @@
         async function cobrarPedido(pedidoId) {
             await fetch(`${API}/pedidos/${pedidoId}/estado`, {
                 method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({estado: 'pagado'})
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ estado: 'pagado' })
             });
             cargarMozo();
         }
@@ -321,7 +479,7 @@
         async function cargarChef() {
             await cargarDatos();
             const pendientes = pedidos.filter(p => ['pendiente', 'en_preparacion', 'listo'].includes(p.estado));
-            
+
             let html = '';
             for (let p of pendientes) {
                 const items = await fetch(`${API}/pedidos/${p.id}/items`).then(r => r.json());
@@ -342,15 +500,15 @@
         async function cambiarEstado(pedidoId, estado) {
             await fetch(`${API}/pedidos/${pedidoId}/estado`, {
                 method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({estado})
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ estado })
             });
             cargarChef();
         }
 
         async function cargarGeneral() {
             await cargarDatos();
-            
+
             document.getElementById('todasMesas').innerHTML = mesas.map(m => {
                 const ocupada = m.mozo_id ? 'ocupada' : '';
                 return `<div class="mesa-card ${ocupada}">
@@ -376,4 +534,5 @@
         cargarDatos();
     </script>
 </body>
+
 </html>

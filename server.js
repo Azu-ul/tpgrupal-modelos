@@ -30,7 +30,10 @@ app.get('/api/personal', (req, res) => {
 app.post('/api/personal', (req, res) => {
     const { nombre, rol } = req.body;
     db.query('INSERT INTO personal (nombre, rol) VALUES (?, ?)', [nombre, rol], (err, result) => {
-        if (err) throw err;
+        if (err) {
+            res.status(400).json({ error: 'Error al agregar personal' });
+            return;
+        }
         res.json({ id: result.insertId, nombre, rol });
     });
 });
@@ -48,7 +51,10 @@ app.get('/api/mesas', (req, res) => {
 app.post('/api/mesas', (req, res) => {
     const { numero, capacidad } = req.body;
     db.query('INSERT INTO mesas (numero, capacidad) VALUES (?, ?)', [numero, capacidad], (err, result) => {
-        if (err) throw err;
+        if (err) {
+            res.status(400).json({ error: 'Mesa ya existe o error en BD' });
+            return;
+        }
         res.json({ id: result.insertId, numero, capacidad });
     });
 });
@@ -72,7 +78,10 @@ app.get('/api/menu', (req, res) => {
 app.post('/api/menu', (req, res) => {
     const { nombre, precio, categoria } = req.body;
     db.query('INSERT INTO menu (nombre, precio, categoria) VALUES (?, ?, ?)', [nombre, precio, categoria], (err, result) => {
-        if (err) throw err;
+        if (err) {
+            res.status(400).json({ error: 'Error al agregar menú' });
+            return;
+        }
         res.json({ id: result.insertId, nombre, precio, categoria });
     });
 });
@@ -108,19 +117,19 @@ app.get('/api/pedidos/:id/items', (req, res) => {
 app.post('/api/pedidos', (req, res) => {
     const { mesa_id, mozo_id, items } = req.body;
     const total = items.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
-    
-    db.query('INSERT INTO pedidos (mesa_id, mozo_id, total) VALUES (?, ?, ?)', 
+
+    db.query('INSERT INTO pedidos (mesa_id, mozo_id, total) VALUES (?, ?, ?)',
         [mesa_id, mozo_id, total], (err, result) => {
-        if (err) throw err;
-        const pedido_id = result.insertId;
-        
-        items.forEach(item => {
-            db.query('INSERT INTO pedido_items (pedido_id, menu_id, cantidad, precio_unitario) VALUES (?, ?, ?, ?)',
-                [pedido_id, item.menu_id, item.cantidad, item.precio]);
+            if (err) throw err;
+            const pedido_id = result.insertId;
+
+            items.forEach(item => {
+                db.query('INSERT INTO pedido_items (pedido_id, menu_id, cantidad, precio_unitario) VALUES (?, ?, ?, ?)',
+                    [pedido_id, item.menu_id, item.cantidad, item.precio]);
+            });
+
+            res.json({ id: pedido_id, total });
         });
-        
-        res.json({ id: pedido_id, total });
-    });
 });
 
 app.put('/api/pedidos/:id/estado', (req, res) => {
