@@ -167,8 +167,11 @@ app.post('/api/pedidos', (req, res) => {
     const { mesa_id, mozo_id, items, cocinero_id, chef_id } = req.body;
     const total = items.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
 
+    // Obtener el chef_id del usuario actual si no se proporciona
+    const finalChefId = chef_id || mozo_id; // Usa mozo_id como fallback
+
     db.query('INSERT INTO pedidos (mesa_id, mozo_id, total, cocinero_id, chef_id) VALUES (?, ?, ?, ?, ?)',
-        [mesa_id, mozo_id, total, cocinero_id || null, chef_id || null], (err, result) => {
+        [mesa_id, mozo_id, total, cocinero_id || null, finalChefId], (err, result) => {
             if (err) throw err;
             const pedido_id = result.insertId;
 
@@ -182,9 +185,9 @@ app.post('/api/pedidos', (req, res) => {
 });
 
 app.put('/api/pedidos/:id/asignar-cocinero', (req, res) => {
-    const { cocinero_id } = req.body;
-    db.query('UPDATE pedidos SET cocinero_id = ?, estado = ? WHERE id = ?',
-        [cocinero_id, 'asignado', req.params.id], (err) => {
+    const { cocinero_id, chef_id } = req.body;
+    db.query('UPDATE pedidos SET cocinero_id = ?, chef_id = ?, estado = ? WHERE id = ?',
+        [cocinero_id, chef_id || null, 'asignado', req.params.id], (err) => {
             if (err) throw err;
             res.json({ success: true });
         });

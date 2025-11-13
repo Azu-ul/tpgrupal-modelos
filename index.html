@@ -22,76 +22,96 @@
     <div id="vistaAdmin" class="vista">
         <h2>Panel de Administración</h2>
 
-        <h3>Registrar Personal</h3>
-        <div class="form-group">
-            <input type="text" id="nombrePersonal" placeholder="Nombre">
-            <select id="rolPersonal">
-                <option value="mozo">Mozo</option>
-                <option value="chef">Chef</option>
-                <option value="cocinero">Cocinero</option>
-                <option value="admin">Admin</option>
-            </select>
-            <button onclick="agregarPersonal()">Agregar Personal</button>
-        </div>
-        <table id="tablaPersonal">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Rol</th>
-                </tr>
-            </thead>
-            <tbody id="tbodyPersonal"></tbody>
-        </table>
+        <div class="columna">
+            <div class="seccion">
+                <h3>Registrar Personal</h3>
+                <div class="form-group">
+                    <input type="text" id="nombrePersonal" placeholder="Nombre">
+                    <select id="rolPersonal">
+                        <option value="mozo">Mozo</option>
+                        <option value="chef">Chef</option>
+                        <option value="cocinero">Cocinero</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                    <button onclick="agregarPersonal()">+</button>
+                </div>
+                <div class="table-wrapper">
+                    <table id="tablaPersonal">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Rol</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyPersonal"></tbody>
+                    </table>
+                </div>
+            </div>
 
-        <h3>Registrar Mesa</h3>
-        <div class="form-group">
-            <input type="number" id="numeroMesa" placeholder="Número">
-            <input type="number" id="capacidadMesa" placeholder="Capacidad">
-            <button onclick="agregarMesa()">Agregar Mesa</button>
+            <div class="seccion">
+                <h3>Registrar Mesa</h3>
+                <div class="form-group">
+                    <input type="number" id="numeroMesa" placeholder="Nº">
+                    <input type="number" id="capacidadMesa" placeholder="Cap">
+                    <button onclick="agregarMesa()">+</button>
+                </div>
+                <div class="table-wrapper">
+                    <table id="tablaMesas">
+                        <thead>
+                            <tr>
+                                <th>Nº</th>
+                                <th>Cap</th>
+                                <th>Mozo</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyMesas"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        <table id="tablaMesas">
-            <thead>
-                <tr>
-                    <th>Número</th>
-                    <th>Capacidad</th>
-                    <th>Mozo Asignado</th>
-                </tr>
-            </thead>
-            <tbody id="tbodyMesas"></tbody>
-        </table>
-        <h3>Registrar Item de Menú</h3>
-        <div class="form-group">
-            <input type="text" id="nombreMenu" placeholder="Nombre">
-            <input type="number" id="precioMenu" placeholder="Precio">
-            <select id="categoriaMenu">
-                <option value="entrada">Entrada</option>
-                <option value="principal">Principal</option>
-                <option value="postre">Postre</option>
-                <option value="bebida">Bebida</option>
-            </select>
-            <button onclick="agregarMenu()">Agregar al Menú</button>
-        </div>
-        <table id="tablaMenu">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Precio</th>
-                    <th>Categoría</th>
-                </tr>
-            </thead>
-            <tbody id="tbodyMenu"></tbody>
-        </table>
 
-        <h3>Reportes</h3>
-        <div class="form-group">
-            <label>Fecha Inicio:</label>
-            <input type="date" id="fechaInicio">
-            <label>Fecha Fin:</label>
-            <input type="date" id="fechaFin">
-            <button onclick="generarReporte()">Generar Reporte</button>
+        <div class="columna">
+            <div class="seccion">
+                <h3>Registrar Item de Menú</h3>
+                <div class="form-group">
+                    <input type="text" id="nombreMenu" placeholder="Nombre">
+                    <input type="number" id="precioMenu" placeholder="$">
+                    <select id="categoriaMenu">
+                        <option value="entrada">Entrada</option>
+                        <option value="principal">Principal</option>
+                        <option value="postre">Postre</option>
+                        <option value="bebida">Bebida</option>
+                    </select>
+                    <button onclick="agregarMenu()">+</button>
+                </div>
+                <div class="table-wrapper">
+                    <table id="tablaMenu">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>$</th>
+                                <th>Cat</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyMenu"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="seccion">
+                <h3>Reportes</h3>
+                <div class="form-group">
+                    <input type="date" id="fechaInicio">
+                    <input type="date" id="fechaFin">
+                    <button onclick="generarReporte()">Ver</button>
+                </div>
+                <div id="reporteResultado"></div>
+            </div>
         </div>
-        <div id="reporteResultado"></div>
     </div>
 
     <!-- VISTA COCINERO -->
@@ -524,10 +544,12 @@
         async function asignarCocinero(pedidoId) {
             const cocineroId = document.getElementById(`coci-${pedidoId}`).value;
             if (!cocineroId) return alert('Selecciona un cocinero');
+
+            // Actualizar el pedido con el chef_id actual
             await fetch(`${API}/pedidos/${pedidoId}/asignar-cocinero`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ cocinero_id: cocineroId })
+                body: JSON.stringify({ cocinero_id: cocineroId, chef_id: usuarioActual.id })
             });
             cargarChef();
         }
